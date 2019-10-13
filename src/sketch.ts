@@ -7,7 +7,7 @@ export function getSketch(canvasState: any) {
     const y_vals: number[] = [];
     const thetas = times(2, () => tf.scalar(Math.random()).variable());
 
-    const learningRate = 0.5;
+    const learningRate = 0.1;
     const optimizer = tf.train.sgd(learningRate);
 
     return (p5: p5) => {
@@ -23,9 +23,17 @@ export function getSketch(canvasState: any) {
             tf.tidy(() => {
                 const ys = tf.tensor1d(y_vals);
 
+                // train model
                 if (x_vals.length > 0) {
-                    //@ts-ignore
-                    optimizer.minimize(() => loss(predict(x_vals), ys));
+                    const cost = optimizer.minimize(
+                        () => loss(predict(x_vals), ys),
+                        true,
+                        thetas
+                    );
+
+                    if (cost) {
+                        console.log(cost.dataSync());
+                    }
                 }
 
                 // draw points
@@ -38,6 +46,7 @@ export function getSketch(canvasState: any) {
                     }
                 );
 
+                // draw line
                 const lineY = predict([0, 1]).dataSync();
 
                 p5.strokeWeight(4);
@@ -48,8 +57,6 @@ export function getSketch(canvasState: any) {
                     p5.map(lineY[1], 0, 1, p5.height, 0)
                 );
             });
-
-            console.log(tf.memory().numTensors)
         };
 
         p5.mousePressed = () => {
@@ -60,7 +67,7 @@ export function getSketch(canvasState: any) {
             y_vals.push(y);
         };
 
-        function predict(x_vals: number[]): tf.Tensor {
+        function predict(x_vals: number[]): tf.Tensor<tf.Rank.R1> {
             const [b, m] = thetas;
             return tf
                 .tensor1d(x_vals)
@@ -68,7 +75,10 @@ export function getSketch(canvasState: any) {
                 .add(b);
         }
 
-        function loss(pred: tf.Tensor, label: tf.Tensor) {
+        function loss(
+            pred: tf.Tensor<tf.Rank.R1>,
+            label: tf.Tensor<tf.Rank.R1>
+        ): tf.Tensor<tf.Rank.R0> {
             return pred
                 .sub(label)
                 .square()
