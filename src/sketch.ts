@@ -8,13 +8,14 @@ export function getSketch(canvasState: any) {
     let thetas: tf.Variable<tf.Rank.R0>[];
 
     const learningRate = 0.1;
+    const numParams = 8;
     const optimizer = tf.train.adam(learningRate);
 
     return (p5: p5) => {
         p5.setup = () => {
             p5.createCanvas(p5.windowWidth / 2, p5.windowHeight / 2);
 
-            thetas = times(3, () => tf.scalar(p5.random(-1, 1)).variable());
+            thetas = times(numParams, () => tf.scalar(p5.random(-1, 1)).variable());
         };
 
         p5.draw = () => {
@@ -63,6 +64,8 @@ export function getSketch(canvasState: any) {
 
                 p5.endShape();
             });
+
+            console.log(tf.memory().numTensors);
         };
 
         p5.mousePressed = () => {
@@ -76,13 +79,10 @@ export function getSketch(canvasState: any) {
         function predict(x_vals: number[]): tf.Tensor<tf.Rank.R1> {
             const xs = tf.tensor1d(x_vals);
 
-            const [a, b, c] = thetas;
-
-            return xs
-                .square()
-                .mul(a)
-                .add(xs.mul(b))
-                .add(c);
+            return thetas.reduce(
+                (res, theta, idx) => res.add(xs.pow(idx).mul(theta)),
+                tf.zeros([xs.size]) as tf.Tensor<tf.Rank.R1>
+            );
         }
 
         function loss(
