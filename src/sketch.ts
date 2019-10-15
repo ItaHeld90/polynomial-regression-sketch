@@ -2,6 +2,7 @@ import p5 from 'p5';
 import * as tf from '@tensorflow/tfjs';
 import { zip, range } from 'lodash';
 import { RegressionCanvasState } from './regression-canvas-state';
+import { paramsToFunctionText } from './helper-utils';
 
 export function getSketch(canvasState: RegressionCanvasState) {
     const x_vals: number[] = [];
@@ -60,9 +61,9 @@ export function getSketch(canvasState: RegressionCanvasState) {
                 // draw cost
                 if (cost != null) {
                     p5.push();
+                    p5.translate(10, 30);
 
-                    p5.translate(10, p5.height - 10);
-
+                    
                     p5.textSize(16);
                     p5.fill('red');
                     p5.noStroke();
@@ -70,6 +71,23 @@ export function getSketch(canvasState: RegressionCanvasState) {
 
                     p5.pop();
                 }
+
+                // draw function
+                p5.push();
+                p5.translate(10, p5.height - 10);
+
+                p5.textSize(24);
+                p5.noStroke();
+                p5.fill('green');
+
+                const parameters = canvasState.thetas.map(
+                    theta => +theta.dataSync()
+                );
+
+                const funcText = paramsToFunctionText(parameters);
+                p5.text(funcText, 0, 0);
+
+                p5.pop();
             });
         };
 
