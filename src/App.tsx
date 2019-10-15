@@ -4,11 +4,11 @@ import React from 'react';
 import { getSketch } from './sketch';
 
 function App() {
-  return (
-    <div className="App">
-      <P5Wrapper sketch={getSketch({})} />
-    </div>
-  );
+    return (
+        <div className="App">
+            <P5Wrapper sketch={getSketch({})} />
+        </div>
+    );
 }
 
 export default App;

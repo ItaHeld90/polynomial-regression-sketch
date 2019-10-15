@@ -1,24 +1,25 @@
 import p5 from 'p5';
 import * as tf from '@tensorflow/tfjs';
-import { zip, times } from 'lodash';
+import { zip, times, range } from 'lodash';
 
 export function getSketch(canvasState: any) {
     const x_vals: number[] = [];
     const y_vals: number[] = [];
-    const thetas = times(2, () => tf.scalar(Math.random()).variable());
+    const thetas = times(3, () => tf.scalar(Math.random()).variable());
 
-    const learningRate = 0.1;
-    const optimizer = tf.train.sgd(learningRate);
+    const learningRate = 0.2;
+    const optimizer = tf.train.adam(learningRate);
 
     return (p5: p5) => {
         p5.setup = () => {
-            p5.createCanvas(p5.windowWidth, p5.windowHeight);
+            p5.createCanvas(p5.windowWidth / 2, p5.windowHeight / 2);
         };
 
         p5.draw = () => {
-            p5.background('grey');
+            p5.background('black');
 
             p5.strokeWeight(8);
+            p5.stroke('white');
 
             tf.tidy(() => {
                 const ys = tf.tensor1d(y_vals);
@@ -31,6 +32,7 @@ export function getSketch(canvasState: any) {
                         thetas
                     );
 
+                    // log the cost
                     if (cost) {
                         console.log(cost.dataSync());
                     }
@@ -46,16 +48,21 @@ export function getSketch(canvasState: any) {
                     }
                 );
 
-                // draw line
-                const lineY = predict([0, 1]).dataSync();
+                // draw curve
+                const curveX = range(0, 1.05, 0.01);
+                const curveY = predict(curveX).dataSync();
 
-                p5.strokeWeight(4);
-                p5.line(
-                    0,
-                    p5.map(lineY[0], 0, 1, p5.height, 0),
-                    p5.width,
-                    p5.map(lineY[1], 0, 1, p5.height, 0)
-                );
+                p5.strokeWeight(3);
+                p5.noFill();
+                p5.beginShape();
+
+                curveY.forEach((y: number, idx: number) => {
+                    const denormX = p5.map(curveX[idx], 0, 1, 0, p5.width);
+                    const denormY = p5.map(y, 0, 1, p5.height, 0);
+                    p5.vertex(denormX, denormY);
+                });
+
+                p5.endShape();
             });
         };
 
@@ -68,11 +75,15 @@ export function getSketch(canvasState: any) {
         };
 
         function predict(x_vals: number[]): tf.Tensor<tf.Rank.R1> {
-            const [b, m] = thetas;
-            return tf
-                .tensor1d(x_vals)
-                .mul(m)
-                .add(b);
+            const xs = tf.tensor1d(x_vals);
+
+            const [a, b, c] = thetas;
+
+            return xs
+                .square()
+                .mul(a)
+                .add(xs.mul(b))
+                .add(c);
         }
 
         function loss(
