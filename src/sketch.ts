@@ -8,14 +8,16 @@ export function getSketch(canvasState: any) {
     let thetas: tf.Variable<tf.Rank.R0>[];
 
     const learningRate = 0.1;
-    const numParams = 8;
+    const numParams = 4;
     const optimizer = tf.train.adam(learningRate);
 
     return (p5: p5) => {
         p5.setup = () => {
             p5.createCanvas(p5.windowWidth / 2, p5.windowHeight / 2);
 
-            thetas = times(numParams, () => tf.scalar(p5.random(-1, 1)).variable());
+            thetas = times(numParams, () =>
+                tf.scalar(p5.random(-1, 1)).variable()
+            );
         };
 
         p5.draw = () => {
@@ -28,18 +30,14 @@ export function getSketch(canvasState: any) {
                 const ys = tf.tensor1d(y_vals);
 
                 // train model
-                if (x_vals.length > 0) {
-                    const cost = optimizer.minimize(
-                        () => loss(predict(x_vals), ys),
-                        true,
-                        thetas
-                    );
-
-                    // log the cost
-                    if (cost) {
-                        console.log(cost.dataSync());
-                    }
-                }
+                const cost =
+                    x_vals.length > 0
+                        ? optimizer.minimize(
+                              () => loss(predict(x_vals), ys),
+                              true,
+                              thetas
+                          )
+                        : tf.scalar(0);
 
                 // draw points
                 (zip(x_vals, y_vals) as [number, number][]).forEach(
@@ -49,23 +47,37 @@ export function getSketch(canvasState: any) {
                 );
 
                 // draw curve
-                const curveX = range(-1, 1.01, 0.01);
-                const curveY = predict(curveX).dataSync();
+                if (x_vals.length) {
+                    const curveX = range(-1, 1.01, 0.01);
+                    const curveY = predict(curveX).dataSync();
 
-                p5.strokeWeight(3);
-                p5.noFill();
-                p5.beginShape();
+                    p5.strokeWeight(3);
+                    p5.noFill();
+                    p5.beginShape();
 
-                curveY.forEach((y: number, idx: number) => {
-                    const denormX = denormalizeX(curveX[idx]);
-                    const denormY = denormalizeY(y);
-                    p5.vertex(denormX, denormY);
-                });
+                    curveY.forEach((y: number, idx: number) => {
+                        const denormX = denormalizeX(curveX[idx]);
+                        const denormY = denormalizeY(y);
+                        p5.vertex(denormX, denormY);
+                    });
 
-                p5.endShape();
+                    p5.endShape();
+                }
+
+                // draw cost
+                if (cost != null) {
+                    p5.push();
+
+                    p5.translate(10, p5.height - 10);
+
+                    p5.textSize(16);
+                    p5.fill('red');
+                    p5.noStroke();
+                    p5.text(`Cost: ${(+cost.dataSync()).toFixed(4)}`, 0, 0);
+
+                    p5.pop();
+                }
             });
-
-            console.log(tf.memory().numTensors);
         };
 
         p5.mousePressed = () => {
