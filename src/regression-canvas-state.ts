@@ -6,6 +6,8 @@ import { randomInRange } from './helper-utils';
 const defaultNumParameters = 3;
 
 export class RegressionCanvasState {
+    x_vals: number[] = [];
+    y_vals: number[] = [];
     @observable.ref thetas: tf.Variable<tf.Rank.R0>[] = times(
         defaultNumParameters,
         () => tf.scalar(randomInRange(-1, 1)).variable()
@@ -24,5 +26,16 @@ export class RegressionCanvasState {
     @computed
     get numParams(): number {
         return this.thetas.length;
+    }
+
+    @action
+    reset() {
+        this.setNumThetas(defaultNumParameters);
+        this.resetDataPoints();
+    }
+
+    resetDataPoints() {
+        this.x_vals = [];
+        this.y_vals = [];
     }
 }

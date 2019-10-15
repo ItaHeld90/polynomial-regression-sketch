@@ -5,13 +5,14 @@ export function randomInRange(min: number, max: number): number {
 export function paramsToFunctionText(thetas: number[]): string {
     const funcText = thetas.reduce((funcText, theta, idx) => {
         const fixedTheta = theta.toFixed(2);
+        const thetaText = theta < 0 ? `(${fixedTheta})` : fixedTheta;
 
         const componentText =
             idx === 0
-                ? fixedTheta
+                ? thetaText
                 : idx === 1
-                ? `${fixedTheta}x`
-                : `${fixedTheta}x^${idx}`;
+                ? `${thetaText}x`
+                : `${thetaText}x^${idx}`;
 
         return idx === 0 ? componentText : `${componentText} + ${funcText}`;
     }, '');

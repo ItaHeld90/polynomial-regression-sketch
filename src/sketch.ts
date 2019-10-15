@@ -5,15 +5,15 @@ import { RegressionCanvasState } from './regression-canvas-state';
 import { paramsToFunctionText } from './helper-utils';
 
 export function getSketch(canvasState: RegressionCanvasState) {
-    const x_vals: number[] = [];
-    const y_vals: number[] = [];
-
     const learningRate = 0.1;
     const optimizer = tf.train.adam(learningRate);
 
     return (p5: p5) => {
         p5.setup = () => {
-            p5.createCanvas(p5.windowWidth / 2, p5.windowHeight / 2);
+            p5.createCanvas(
+                (p5.windowWidth * 3) / 4,
+                (p5.windowHeight * 3) / 4
+            );
         };
 
         p5.draw = () => {
@@ -23,6 +23,7 @@ export function getSketch(canvasState: RegressionCanvasState) {
             p5.stroke('white');
 
             tf.tidy(() => {
+                const { x_vals, y_vals } = canvasState;
                 const ys = tf.tensor1d(y_vals);
 
                 // train model
@@ -63,7 +64,6 @@ export function getSketch(canvasState: RegressionCanvasState) {
                     p5.push();
                     p5.translate(10, 30);
 
-                    
                     p5.textSize(16);
                     p5.fill('red');
                     p5.noStroke();
@@ -92,11 +92,21 @@ export function getSketch(canvasState: RegressionCanvasState) {
         };
 
         p5.mousePressed = () => {
+            // ignore clicks outside the canvas
+            if (
+                p5.mouseX < 0 ||
+                p5.mouseX > p5.width ||
+                p5.mouseY < 0 ||
+                p5.mouseY > p5.height
+            ) {
+                return;
+            }
+
             const x = normalizeX(p5.mouseX);
             const y = normalizeY(p5.mouseY);
 
-            x_vals.push(x);
-            y_vals.push(y);
+            canvasState.x_vals.push(x);
+            canvasState.y_vals.push(y);
         };
 
         function predict(x_vals: number[]): tf.Tensor<tf.Rank.R1> {
