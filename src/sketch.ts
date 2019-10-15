@@ -42,22 +42,20 @@ export function getSketch(canvasState: RegressionCanvasState) {
                 );
 
                 // draw curve
-                if (x_vals.length) {
-                    const curveX = range(-1, 1.01, 0.01);
-                    const curveY = predict(curveX).dataSync();
+                const curveX = range(-1, 1.01, 0.01);
+                const curveY = predict(curveX).dataSync();
 
-                    p5.strokeWeight(3);
-                    p5.noFill();
-                    p5.beginShape();
+                p5.strokeWeight(3);
+                p5.noFill();
+                p5.beginShape();
 
-                    curveY.forEach((y: number, idx: number) => {
-                        const denormX = denormalizeX(curveX[idx]);
-                        const denormY = denormalizeY(y);
-                        p5.vertex(denormX, denormY);
-                    });
+                curveY.forEach((y: number, idx: number) => {
+                    const denormX = denormalizeX(curveX[idx]);
+                    const denormY = denormalizeY(y);
+                    p5.vertex(denormX, denormY);
+                });
 
-                    p5.endShape();
-                }
+                p5.endShape();
 
                 // draw cost
                 if (cost != null) {
