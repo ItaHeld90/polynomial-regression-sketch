@@ -1,23 +1,18 @@
 import p5 from 'p5';
 import * as tf from '@tensorflow/tfjs';
-import { zip, times, range } from 'lodash';
+import { zip, range } from 'lodash';
+import { RegressionCanvasState } from './regression-canvas-state';
 
-export function getSketch(canvasState: any) {
+export function getSketch(canvasState: RegressionCanvasState) {
     const x_vals: number[] = [];
     const y_vals: number[] = [];
-    let thetas: tf.Variable<tf.Rank.R0>[];
 
     const learningRate = 0.1;
-    const numParams = 4;
     const optimizer = tf.train.adam(learningRate);
 
     return (p5: p5) => {
         p5.setup = () => {
             p5.createCanvas(p5.windowWidth / 2, p5.windowHeight / 2);
-
-            thetas = times(numParams, () =>
-                tf.scalar(p5.random(-1, 1)).variable()
-            );
         };
 
         p5.draw = () => {
@@ -35,7 +30,7 @@ export function getSketch(canvasState: any) {
                         ? optimizer.minimize(
                               () => loss(predict(x_vals), ys),
                               true,
-                              thetas
+                              canvasState.thetas
                           )
                         : tf.scalar(0);
 
@@ -91,7 +86,7 @@ export function getSketch(canvasState: any) {
         function predict(x_vals: number[]): tf.Tensor<tf.Rank.R1> {
             const xs = tf.tensor1d(x_vals);
 
-            return thetas.reduce(
+            return canvasState.thetas.reduce(
                 (res, theta, idx) => res.add(xs.pow(idx).mul(theta)),
                 tf.zeros([xs.size]) as tf.Tensor<tf.Rank.R1>
             );
