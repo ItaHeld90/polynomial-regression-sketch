@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.js": "/polynomial-regression-sketch/static/js/main.421c0b52.chunk.js",
+    "main.js.map": "/polynomial-regression-sketch/static/js/main.421c0b52.chunk.js.map",
+    "runtime-main.js": "/polynomial-regression-sketch/static/js/runtime-main.954aeb22.js",
+    "runtime-main.js.map": "/polynomial-regression-sketch/static/js/runtime-main.954aeb22.js.map",
+    "static/css/2.802837ff.chunk.css": "/polynomial-regression-sketch/static/css/2.802837ff.chunk.css",
+    "static/js/2.393f82d1.chunk.js": "/polynomial-regression-sketch/static/js/2.393f82d1.chunk.js",
+    "static/js/2.393f82d1.chunk.js.map": "/polynomial-regression-sketch/static/js/2.393f82d1.chunk.js.map",
+    "index.html": "/polynomial-regression-sketch/index.html",
+    "precache-manifest.8acafb9928af53455bb381d3f3381af6.js": "/polynomial-regression-sketch/precache-manifest.8acafb9928af53455bb381d3f3381af6.js",
+    "service-worker.js": "/polynomial-regression-sketch/service-worker.js",
+    "static/css/2.802837ff.chunk.css.map": "/polynomial-regression-sketch/static/css/2.802837ff.chunk.css.map"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.954aeb22.js",
+    "static/css/2.802837ff.chunk.css",
+    "static/js/2.393f82d1.chunk.js",
+    "static/js/main.421c0b52.chunk.js"
+  ]
+}
